@@ -1,0 +1,26 @@
+[
+  {
+    "operario": "NombreOperario1",
+    "placa": "ABC123",
+    "fechaHora": "2024-01-10T12:30:00",
+    "estadoLimpia": true,
+    "observaciones": "Observaciones 1",
+    "fotoObservaciones": "imagen1.jpg",
+    "novedades": "Novedades mecánicas 1",
+    "fotoKilometrajeGasolina": "imagen2.jpg"
+  },
+  {
+    "operario": "NombreOperario2",
+    "placa": "XYZ789",
+    "fechaHora": "2024-01-11T14:45:00",
+    "estadoLimpia": false,
+    "observaciones": "Observaciones 2",
+    "fotoObservaciones": "imagen3.jpg",
+    "novedades": "Novedades mecánicas 2",
+    "fotoKilometrajeGasolina": "imagen4.jpg"
+  },
+  // Agrega más objetos para representar más grúas
+]
+
+
+  

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>CRUD de Grúas</title>
+</head>
+<body>
+  <header>
+    <h1 class="title">CRUD de Grúas</h1>
+    <img src="img_importantes/Diseño sin título.png" alt="Logo" class="logo">
+  </header>
+
+  <form id="gruaForm" class="form">
+    <label for="nombreOperario">Nombre del Operario:</label>
+    <input type="text" id="nombreOperario" required>
+
+    <label for="placaGrua">Placa de la Grúa:</label>
+    <input type="text" id="placaGrua" required>
+
+    <label for="fechaHora">Fecha y Hora:</label>
+    <input type="datetime-local" id="fechaHora" required>
+
+    <label for="estadoGrua">Estado de la Grúa (Limpia):</label>
+    <select id="estadoGrua" required>
+      <option value="si">Sí</option>
+      <option value="no">No</option>
+    </select>
+
+    <label for="observaciones">Observaciones:</label>
+    <textarea id="observaciones"></textarea>
+
+    <label for="fotoObservaciones">Foto de las Observaciones:</label>
+    <input type="file" id="fotoObservaciones" accept="image/*">
+
+    <label for="novedadesGrua">Novedades de la Grúa (Mecánicas):</label>
+    <textarea id="novedadesGrua"></textarea>
+
+    <label for="fotoKilometrajeGasolina">Foto Kilometraje y Gasolina:</label>
+    <input type="file" id="fotoKilometrajeGasolina" accept="image/*">
+
+    <button type="button" onclick="agregarGrua()">Agregar Grúa</button>
+  </form>
+
+  <ul id="listaGruas" class="grua-list"></ul>
+
+  <footer class="footer">
+    <p>&copy; 2024 CRUD de Grúas | Nelson Fernando Correal Lopez</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/firebase@9.19.1/dist/firebase-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@9.19.1/dist/firebase-firestore.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
