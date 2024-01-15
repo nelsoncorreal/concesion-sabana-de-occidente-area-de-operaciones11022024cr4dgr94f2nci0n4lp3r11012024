@@ -1,57 +1,153 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
   <link rel="icon" href="Diseño sin título.png">
-  <title>CRUD de Grúas</title>
+  <title>Turno Grua</title>
+
+  
 </head>
+
 <body>
-  <header>
-    <h1 class="title">CRUD de Grúas</h1>
-    <img src="Diseño sin título.png" alt="Logo" class="logo">
-  </header>
+  <label for="noperario">Nombre Operario:</label>
+  <input type="text" id="noperario">
+  <br><br>
 
-  <form id="gruaForm" class="form">
-    <label for="nombreOperario">Nombre del Operario:</label>
-    <input type="text" id="nombreOperario" required>
+  <label for="placa">Placa del Carro:</label>
+  <input type="text" id="placa">
+  <br><br>
 
-    <label for="placaGrua">Placa de la Grúa:</label>
-    <input type="text" id="placaGrua" required>
+  <label for="fecha">Fecha y Hora Actual:</label>
+  <input type="text" id="fecha" readonly>
+  <br><br>
 
-    <label for="fechaHora">Fecha y Hora:</label>
-    <input type="datetime-local" id="fechaHora" required>
+  <label for="estado">Estado de la Grúa (limpia sí/no):</label>
+  <input type="text" id="estado">
+  <br><br>
 
-    <label for="estadoGrua">Estado de la Grúa (Limpia):</label>
-    <select id="estadoGrua" required>
-      <option value="si">Sí</option>
-      <option value="no">No</option>
-    </select>
+  <label for="observaciones">Observaciones y Foto:</label>
+  <input type="file" id="observacionesFoto">
+  <input type="text" id="observaciones">
+  <br><br>
 
-    <label for="observaciones">Observaciones:</label>
-    <textarea id="observaciones"></textarea>
+  <label for="novedades">Novedades Mecánicas:</label>
+  <input type="text" id="novedades">
+  <br><br>
 
-    <label for="fotoObservaciones">Foto de las Observaciones:</label>
-    <input type="file" id="fotoObservaciones" accept="image/*">
+  <label for="kilometraje">Observaciones y Foto de Kilometraje:</label>
+  <input type="file" id="kilometrajeFoto">
+  <input type="text" id="kilometraje">
+  <br><br>
 
-    <label for="novedadesGrua">Novedades de la Grúa (Mecánicas):</label>
-    <textarea id="novedadesGrua"></textarea>
+  <label for="gasolina">Observaciones y Foto de Gasolina:</label>
+  <input type="file" id="gasolinaFoto">
+  <input type="text" id="gasolina">
+  <br><br>
 
-    <label for="fotoKilometrajeGasolina">Foto Kilometraje y Gasolina:</label>
-    <input type="file" id="fotoKilometrajeGasolina" accept="image/*">
+  <button id="addBtn">Agregar Datos</button>
 
-    <button type="button" onclick="agregarGrua()">Agregar Grúa</button>
-  </form>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadString, getDownloadURL} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-  <ul id="listaGruas" class="grua-list"></ul>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDblaWYr7qnuOrZxDflz2gilEwc4CgMLA8",
+      authDomain: "bd-gruas-crud.firebaseapp.com",
+      databaseURL: "https://bd-gruas-crud-default-rtdb.firebaseio.com",
+      projectId: "bd-gruas-crud",
+      storageBucket: "bd-gruas-crud.appspot.com",
+      messagingSenderId: "167496761184",
+      appId: "1:167496761184:web:4576d75997e3aebc462805"
+    };
 
-  <footer class="footer">
-    <p>&copy; 2024 CRUD de Grúas | Nelson Fernando Correal Lopez</p>
-  </footer>
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase();
+    const storage = getStorage();
 
-  <script src="https://cdn.jsdelivr.net/npm/firebase@9.19.1/dist/firebase-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/firebase@9.19.1/dist/firebase-firestore.js"></script>
-  <script src="app.js"></script>
+    const noperarioInput = document.getElementById('noperario');
+    const placaInput = document.getElementById('placa');
+    const fechaInput = document.getElementById('fecha');
+    const estadoInput = document.getElementById('estado');
+    const observacionesFotoInput = document.getElementById('observacionesFoto');
+    const observacionesInput = document.getElementById('observaciones');
+    const novedadesInput = document.getElementById('novedades');
+    const kilometrajeFotoInput = document.getElementById('kilometrajeFoto');
+    const kilometrajeInput = document.getElementById('kilometraje');
+    const gasolinaFotoInput = document.getElementById('gasolinaFoto');
+    const gasolinaInput = document.getElementById('gasolina');
+    const addBtn = document.getElementById('addBtn');
+
+    function getCurrentDateTime() {
+      const now = new Date();
+      return now.toLocaleString();
+    }
+
+    function uploadFileAndGetUrl(file, folder) {
+      const storageRefFolder = storageRef(storage, `${folder}/${file.name}`);
+      return uploadString(storageRefFolder, file).then(snapshot => {
+        return getDownloadURL(snapshot.ref);
+      });
+    }
+
+    async function addData() {
+      const observacionesFoto = observacionesFotoInput.files[0];
+      const kilometrajeFoto = kilometrajeFotoInput.files[0];
+      const gasolinaFoto = gasolinaFotoInput.files[0];
+
+      const observacionesFotoUrl = await uploadFileAndGetUrl(observacionesFoto, 'observacionesFotos');
+      const kilometrajeFotoUrl = await uploadFileAndGetUrl(kilometrajeFoto, 'kilometrajeFotos');
+      const gasolinaFotoUrl = await uploadFileAndGetUrl(gasolinaFoto, 'gasolinaFotos');
+
+      set(ref(db, 'EmployeeSet/' + noperarioInput.value), {
+          noperario: {
+            primernombre: noperarioInput.value
+          },
+          placas: {
+            placa: placaInput.value
+          },
+          fecha: getCurrentDateTime(),
+          estado: estadoInput.value,
+          observaciones: {
+            texto: observacionesInput.value,
+            foto: observacionesFotoUrl
+          },
+          novedades: novedadesInput.value,
+          kilometraje: {
+            texto: kilometrajeInput.value,
+            foto: kilometrajeFotoUrl
+          },
+          gasolina: {
+            texto: gasolinaInput.value,
+            foto: gasolinaFotoUrl
+          }
+        })
+        .then(() => {
+          alert("Datos agregados exitosamente");
+          noperarioInput.value = '';
+          placaInput.value = '';
+          fechaInput.value = '';
+          estadoInput.value = '';
+          observacionesInput.value = '';
+          novedadesInput.value = '';
+          kilometrajeInput.value = '';
+          gasolinaInput.value = '';
+        })
+        .catch((error) => {
+          alert("Error al agregar datos: " + error.message);
+          console.error(error);
+        });
+    }
+
+    addBtn.addEventListener('click', addData);
+
+    // Autocompletar la fecha al cargar la página
+    fechaInput.value = getCurrentDateTime();
+  </script>
 </body>
+
 </html>
