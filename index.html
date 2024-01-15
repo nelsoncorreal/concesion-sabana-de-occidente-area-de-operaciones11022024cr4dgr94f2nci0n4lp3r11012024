@@ -6,21 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-  <link rel="icon" href="Diseño sin título.png">
   <title>Turno Grua</title>
   <style>
-      .copyright {
-        text-align: center;
-        margin-top: 20px;
-        color: #1f1e1e; /* Color gris oscuro para las credenciales de copyright */
-      }
-      </style>
+    .copyright {
+      text-align: center;
+      margin-top: 20px;
+      color: #1f1e1e; 
+    }
+    </style>
+  
 </head>
 
 <body>
-<h1 style="color: black; font-size: 45px; font-family: 'Arial', sans-serif;">Estado De La Grúa</h1>
-  <br><br>
-    <br><br>
+  <h1 style="color: black; font-size: 45px; font-family: 'Arial', sans-serif;">Estado De La Grúa</h1>
   <label for="noperario">Nombre Operario:</label>
   <input type="text" id="noperario">
   <br><br>
@@ -104,6 +102,23 @@
     }
 
     async function addData() {
+      if (
+        !noperarioInput.value ||
+        !placaInput.value ||
+        !estadoInput.value ||
+        !observacionesInput.value ||
+        !novedadesInput.value ||
+        !kilometrajeInput.value ||
+        !gasolinaInput.value ||
+        !observacionesFotoInput.files[0] ||
+        !kilometrajeFotoInput.files[0] ||
+        !gasolinaFotoInput.files[0]
+      ) {
+        alert("Por favor, llene todos los campos del formulario.");
+        return;
+      }
+      const currentDate = new Date();
+      const currentDateTime = currentDate.toISOString().replace(/[^\d]/g, ''); 
       const observacionesFoto = observacionesFotoInput.files[0];
       const kilometrajeFoto = kilometrajeFotoInput.files[0];
       const gasolinaFoto = gasolinaFotoInput.files[0];
@@ -112,7 +127,7 @@
       const kilometrajeFotoUrl = await uploadFileAndGetUrl(kilometrajeFoto, 'kilometrajeFotos');
       const gasolinaFotoUrl = await uploadFileAndGetUrl(gasolinaFoto, 'gasolinaFotos');
 
-      set(ref(db, 'EmployeeSet/' + noperarioInput.value), {
+      set(ref(db, 'EmployeeSet/' + currentDateTime), {
           noperario: {
             primernombre: noperarioInput.value
           },
@@ -149,6 +164,8 @@
         .catch((error) => {
           alert("Error al agregar datos: " + error.message);
           console.error(error);
+
+
         });
     }
 
@@ -158,10 +175,9 @@
     fechaInput.value = getCurrentDateTime();
   </script>
 
-    <div class="copyright">
+  <div class="copyright">
     <p>&copy; 2024 Visualización de Datos. Todos los derechos reservados Nelson Fernando Correal Lopez.</p>
   </div>
-  
 </body>
 
 </html>
