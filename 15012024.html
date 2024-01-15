@@ -1,1 +1,141 @@
-html5
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="icon" href="Diseño sin título.png">
+  <title>Visualización de Datos</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    table, th, td {
+      border: 1px solid black;
+    }
+
+    body {
+        color: black; /* Cambiar el color del texto a negro */
+      }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    img {
+      max-width: 100px;
+      max-height: 100px;
+    }
+    .copyright {
+        text-align: center;
+        margin-top: 20px;
+        color: #1f1e1e; /* Color gris oscuro para las credenciales de copyright */
+      }
+
+    
+  </style>
+</head>
+
+<body>
+    <h1 style="color: black; font-size: 45px; font-family: 'Arial', sans-serif;">Datos de las grúas</h1>
+
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre Operario</th>
+        <th>Placa del Carro</th>
+        <th>Fecha y Hora</th>
+        <th>Estado de la Grúa</th>
+        <th>Observaciones</th>
+        <th>Novedades Mecánicas</th>
+        <th>Kilometraje</th>
+        <th>Gasolina</th>
+      </tr>
+    </thead>
+    <tbody id="dataBody"></tbody>
+  </table>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDblaWYr7qnuOrZxDflz2gilEwc4CgMLA8",
+      authDomain: "bd-gruas-crud.firebaseapp.com",
+      databaseURL: "https://bd-gruas-crud-default-rtdb.firebaseio.com",
+      projectId: "bd-gruas-crud",
+      storageBucket: "bd-gruas-crud.appspot.com",
+      messagingSenderId: "167496761184",
+      appId: "1:167496761184:web:4576d75997e3aebc462805"
+    };
+
+    initializeApp(firebaseConfig);
+    const db = getDatabase();
+
+    const dataBody = document.getElementById('dataBody');
+
+    // Función para mostrar datos en la tabla
+    function displayDataInTable(data) {
+      // Limpiar la tabla antes de agregar nuevos datos
+      dataBody.innerHTML = '';
+
+      // Iterar sobre los datos y agregar filas a la tabla
+      for (const key in data) {
+        if (Object.hasOwnProperty.call(data, key)) {
+          const entry = data[key];
+          const row = document.createElement('tr');
+
+          // Agregar cada campo a la fila
+          row.innerHTML = `
+            <td>${entry.noperario.primernombre}</td>
+            <td>${entry.placas.placa}</td>
+            <td>${entry.fecha}</td>
+            <td>${entry.estado}</td>
+            <td>
+              <a href="${entry.observaciones.foto}" target="_blank">
+                <img src="${entry.observaciones.foto}" alt="Observaciones Foto">
+              </a>
+              ${entry.observaciones.texto}
+            </td>
+            <td>${entry.novedades}</td>
+            <td>
+              <a href="${entry.kilometraje.foto}" target="_blank">
+                <img src="${entry.kilometraje.foto}" alt="Kilometraje Foto">
+              </a>
+              ${entry.kilometraje.texto}
+            </td>
+            <td>
+              <a href="${entry.gasolina.foto}" target="_blank">
+                <img src="${entry.gasolina.foto}" alt="Gasolina Foto">
+              </a>
+              ${entry.gasolina.texto}
+            </td>
+          `;
+
+          // Agregar la fila a la tabla
+          dataBody.appendChild(row);
+        }
+      }
+    }
+
+    // Obtener datos de la base de datos y mostrarlos en la tabla
+    onValue(ref(db, 'EmployeeSet'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        displayDataInTable(data);
+      }
+    });
+  </script>
+
+  <div class="copyright">
+    <p>&copy; 2024 Visualización de Datos. Todos los derechos reservados Nelson Fernando Correal Lopez.</p>
+  </div>
+</body>
+
+</html>
