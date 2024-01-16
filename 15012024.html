@@ -8,58 +8,75 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <link rel="icon" href="Diseño sin título.png">
   <title>Visualización de Datos</title>
-  <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-
-    table, th, td {
-      border: 1px solid black;
-    }
-
+    <style>
     body {
-        color: black; /* Cambiar el color del texto a negro */
-      }
+      font-family: 'Arial', sans-serif;
+      font-size: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
 
     th, td {
-      padding: 10px;
+      border: 1px solid #ddd;
+      padding: 8px;
       text-align: left;
     }
 
-    img {
-      max-width: 150px;
-      max-height: 150px;
+    th {
+      background-color: #3498db;
+      color: white;
     }
-    .copyright {
-        text-align: center;
-        margin-top: 20px;
-        color: #1f1e1e; /* Color gris oscuro para las credenciales de copyright */
-      }
 
-    
+    td img {
+      max-width: 120px;
+      max-height: 120px;
+    }
+
+    .delete-btn {
+      background-color: #e74c3c;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .search-box {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 
 <body>
-    <h1 style="color: black; font-size: 45px; font-family: 'Arial', sans-serif;">Datos de las grúas</h1>
+  <h1 style="color: black; font-size: 36px; font-family: 'Arial', sans-serif;">Historial de Datos</h1>
 
-<img src="cso.png" alt="Descripción de la imagen" style="display: block; margin: 0 auto;">
-  
-  <table>
+  <div class="search-box">
+    <label for="startDate">Desde:</label>
+    <input type="date" id="startDate">
+
+    <label for="endDate">Hasta:</label>
+    <input type="date" id="endDate">
+
+    <button onclick="searchData()">Buscar</button>
+  </div>
+
+  <table id="dataTable">
     <thead>
       <tr>
+        <th>Fecha</th>
         <th>Nombre Operario</th>
         <th>Placa del Carro</th>
-        <th>Fecha y Hora</th>
         <th>Estado de la Grúa</th>
         <th>Observaciones</th>
-        <th>Novedades Mecánicas</th>
         <th>Kilometraje</th>
         <th>Gasolina</th>
+        <th>Acciones</th>
       </tr>
     </thead>
-    <tbody id="dataBody"></tbody>
+    <tbody></tbody>
   </table>
 
   <script type="module">
@@ -77,65 +94,126 @@
     };
 
     initializeApp(firebaseConfig);
-    const db = getDatabase();
+     const db = getDatabase();
+    const storage = getStorage();
+    const dataTable = document.getElementById('dataTable');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
 
-    const dataBody = document.getElementById('dataBody');
-
-    // Función para mostrar datos en la tabla
-    function displayDataInTable(data) {
-      // Limpiar la tabla antes de agregar nuevos datos
-      dataBody.innerHTML = '';
-
-      // Iterar sobre los datos y agregar filas a la tabla
-      for (const key in data) {
-        if (Object.hasOwnProperty.call(data, key)) {
-          const entry = data[key];
-          const row = document.createElement('tr');
-
-          // Agregar cada campo a la fila
-          row.innerHTML = `
-            <td>${entry.noperario.primernombre}</td>
-            <td>${entry.placas.placa}</td>
-            <td>${entry.fecha}</td>
-            <td>${entry.estado}</td>
-            <td>
-              <a href="${entry.observaciones.foto}" target="_blank">
-                <img src="${entry.observaciones.foto}" alt="Observaciones Foto">
-              </a>
-              ${entry.observaciones.texto}
-            </td>
-            <td>${entry.novedades}</td>
-            <td>
-              <a href="${entry.kilometraje.foto}" target="_blank">
-                <img src="${entry.kilometraje.foto}" alt="Kilometraje Foto">
-              </a>
-              ${entry.kilometraje.texto}
-            </td>
-            <td>
-              <a href="${entry.gasolina.foto}" target="_blank">
-                <img src="${entry.gasolina.foto}" alt="Gasolina Foto">
-              </a>
-              ${entry.gasolina.texto}
-            </td>
-          `;
-
-          // Agregar la fila a la tabla
-          dataBody.appendChild(row);
-        }
-      }
+    function getCurrentDateTime() {
+      const now = new Date();
+      return now.toISOString().replace(/[^\d]/g, '');
     }
 
-    // Obtener datos de la base de datos y mostrarlos en la tabla
-    onValue(ref(db, 'EmployeeSet'), (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        displayDataInTable(data);
+    function formatDate(dateString) {
+      const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+      return new Date(dateString).toLocaleDateString('es-CO', options);
+    }
+
+    function createDeleteButton(key) {
+      const button = document.createElement('button');
+      button.classList.add('delete-btn');
+      button.textContent = 'Eliminar';
+      button.addEventListener('click', () => deleteData(key));
+      return button;
+    }
+
+    function createDownloadLink(url) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.textContent = 'Descargar';
+      return link;
+    }
+
+    function buildDataRow(data) {
+      const row = document.createElement('tr');
+      const images = ['observaciones', 'kilometraje', 'gasolina'];
+
+      for (const key in data) {
+        const cell = document.createElement('td');
+
+        if (key === 'fecha') {
+          cell.textContent = formatDate(data[key]);
+        } else if (images.includes(key) && data[key] && data[key].foto) {
+          const img = document.createElement('img');
+          img.src = data[key].foto;
+          cell.appendChild(img);
+
+          // Agrega enlace para descargar la imagen
+          const downloadLink = createDownloadLink(data[key].foto);
+          cell.appendChild(downloadLink);
+        } else {
+          cell.textContent = data[key];
+        }
+
+        row.appendChild(cell);
       }
-    });
+
+      // Agrega la columna de acciones (eliminar)
+      const deleteCell = document.createElement('td');
+      const deleteButton = createDeleteButton(data.key);
+      deleteCell.appendChild(deleteButton);
+      row.appendChild(deleteCell);
+
+      return row;
+    }
+
+    function renderData(data) {
+      const tbody = dataTable.querySelector('tbody');
+      tbody.innerHTML = '';
+
+      data.forEach(item => {
+        const row = buildDataRow(item);
+        tbody.appendChild(row);
+      });
+    }
+
+    function deleteData(key) {
+      const deleteRef = ref(db, 'EmployeeSet/' + key);
+      remove(deleteRef)
+        .then(() => {
+          alert("Dato eliminado exitosamente");
+          searchData();
+        })
+        .catch((error) => {
+          alert("Error al eliminar dato: " + error.message);
+          console.error(error);
+        });
+    }
+
+    function searchData() {
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      const query = ref(db, 'EmployeeSet');
+      const data = [];
+
+      onValue(query, (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+          const childData = childSnapshot.val();
+          if ((!startDate || childData.fecha >= startDate) && (!endDate || childData.fecha <= endDate)) {
+            data.push({ ...childData, key: childSnapshot.key });
+          }
+        });
+
+        // Ordena por fecha de manera descendente
+        data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        renderData(data);
+      });
+    }
+
+    // Autocompletar la fecha al cargar la página
+    startDateInput.value = getCurrentDateTime().slice(0, 10);
+    endDateInput.value = getCurrentDateTime().slice(0, 10);
+
+    // Cargar datos iniciales
+    searchData();
   </script>
 
   <div class="copyright">
-    <p>&copy; 2024 Visualización de Datos. Todos los derechos reservados Nelson Fernando Correal Lopez.</p>
+    <p>&copy; 2024 Creación de Datos. Todos los derechos reservados Nelson Fernando Correal Lopez.</p>
   </div>
 </body>
 
