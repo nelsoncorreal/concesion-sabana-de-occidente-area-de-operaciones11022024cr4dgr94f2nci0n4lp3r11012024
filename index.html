@@ -12,20 +12,21 @@
     .copyright {
       text-align: center;
       margin-top: 20px;
-      color: #1f1e1e; 
+      color: #1f1e1e;
     }
-        img {
+
+    img {
       max-width: 150px;
       max-height: 150px;
     }
-    </style>
-  
+  </style>
+
 </head>
 
 <body>
   <h1 style="color: black; font-size: 45px; font-family: 'Arial', sans-serif;">Estado De La Grúa</h1>
   <img src="cso.png" alt="Concesión Sabana De Occidente" style="display: block; margin: 0 auto;">
-  
+
   <input type="text" id="noperario">
   <br><br>
 
@@ -107,7 +108,6 @@
     const observacionesInput = document.getElementById('fecha-observaciones');
     const kilometrajeFotoInput = document.getElementById('kilometrajeFoto');
     const gasolinaFotoInput = document.getElementById('gasolinaFoto');
-    const kilometrajeInput = document.getElementById('kilometrajeFoto');  // Agregada referencia a kilometrajeInput
     const addBtn = document.getElementById('addBtn');
 
     function getCurrentDateTime() {
@@ -156,6 +156,9 @@
         gasolina: {
           texto: gasolinaInput.value,
           foto: gasolinaFotoUrl
+        },
+        kilometraje: {  // Agregada información de kilometraje
+          foto: kilometrajeFotoUrl
         }
       })
         .then(() => {
@@ -186,4 +189,3 @@
 </body>
 
 </html>
-
