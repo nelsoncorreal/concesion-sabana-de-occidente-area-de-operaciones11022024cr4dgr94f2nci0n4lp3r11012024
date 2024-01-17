@@ -2,86 +2,71 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-    <link rel="icon" href="Diseño sin título.png">
-  <title>Visualización de Datos</title>
-    <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      font-size: 18px;
-    }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="Diseño sin título.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+  <title>Visualizar Datos</title>
+  <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          font-size: 18px;
+        }
+    
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+    
+        th, td {
+          border: 1px solid #ddd;
+          padding: 8px;
+          text-align: left;
+        }
+    
+        th {
+          background-color: #3498db;
+          color: white;
+        }
+    
+        td img {
+          max-width: 120px;
+          max-height: 120px;
+        }
+    
+        .delete-btn {
+          background-color: #e74c3c;
+          color: #fff;
+          border: none;
+          padding: 5px 10px;
+          cursor: pointer;
+        }
+    
+        .search-box {
+          margin-bottom: 20px;
+        }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #3498db;
-      color: white;
-    }
-
-    td img {
-      max-width: 120px;
-      max-height: 120px;
-    }
-
-    .delete-btn {
-      background-color: #e74c3c;
-      color: #fff;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-
-    .search-box {
-      margin-bottom: 20px;
-    }
+          img {
+          max-width: 150px;
+          max-height: 150px;
+          cursor: pointer;
+        }
   </style>
 </head>
 
 <body>
-  <h1 style="color: black; font-size: 36px; font-family: 'Arial', sans-serif;">Historial de Datos</h1>
-
-  <div class="search-box">
-    <label for="startDate">Desde:</label>
-    <input type="date" id="startDate">
-
-    <label for="endDate">Hasta:</label>
-    <input type="date" id="endDate">
-
-    <button onclick="searchData()">Buscar</button>
-  </div>
-
-  <table id="dataTable">
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Nombre Operario</th>
-        <th>Placa del Carro</th>
-        <th>Estado de la Grúa</th>
-        <th>Observaciones</th>
-        <th>Kilometraje</th>
-        <th>Gasolina</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <h1 style="color: black; font-size: 45px; font-family: 'Arial', sans-serif;">Visualización de Datos</h1>
+  
+    <label for="searchDate">Buscar por Fecha:</label>
+    <input type="date" id="searchDate" onchange="searchData()">
+    
+    <div id="data-table"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDblaWYr7qnuOrZxDflz2gilEwc4CgMLA8",
@@ -93,127 +78,92 @@
       appId: "1:167496761184:web:4576d75997e3aebc462805"
     };
 
-    initializeApp(firebaseConfig);
-     const db = getDatabase();
-    const storage = getStorage();
-    const dataTable = document.getElementById('dataTable');
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase();
 
-    function getCurrentDateTime() {
-      const now = new Date();
-      return now.toISOString().replace(/[^\d]/g, '');
-    }
-
-    function formatDate(dateString) {
-      const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
-      return new Date(dateString).toLocaleDateString('es-CO', options);
-    }
-
-    function createDeleteButton(key) {
-      const button = document.createElement('button');
-      button.classList.add('delete-btn');
-      button.textContent = 'Eliminar';
-      button.addEventListener('click', () => deleteData(key));
-      return button;
-    }
-
-    function createDownloadLink(url) {
-      const link = document.createElement('a');
-      link.href = url;
-      link.target = '_blank';
-      link.textContent = 'Descargar';
-      return link;
-    }
-
-    function buildDataRow(data) {
-      const row = document.createElement('tr');
-      const images = ['observaciones', 'kilometraje', 'gasolina'];
-
-      for (const key in data) {
-        const cell = document.createElement('td');
-
-        if (key === 'fecha') {
-          cell.textContent = formatDate(data[key]);
-        } else if (images.includes(key) && data[key] && data[key].foto) {
-          const img = document.createElement('img');
-          img.src = data[key].foto;
-          cell.appendChild(img);
-
-          // Agrega enlace para descargar la imagen
-          const downloadLink = createDownloadLink(data[key].foto);
-          cell.appendChild(downloadLink);
-        } else {
-          cell.textContent = data[key];
-        }
-
-        row.appendChild(cell);
-      }
-
-      // Agrega la columna de acciones (eliminar)
-      const deleteCell = document.createElement('td');
-      const deleteButton = createDeleteButton(data.key);
-      deleteCell.appendChild(deleteButton);
-      row.appendChild(deleteCell);
-
-      return row;
-    }
-
-    function renderData(data) {
-      const tbody = dataTable.querySelector('tbody');
-      tbody.innerHTML = '';
-
+    function createTable(data) {
+      const table = document.createElement('table');
+      table.innerHTML = `
+        <tr>
+          <th>Nombre Operario</th>
+          <th>Placa del Carro</th>
+          <th>Fecha y Hora Actual</th>
+          <th>Estado de la Grúa</th>
+          <th>Observaciones</th>
+          <th>Gasolina</th>
+          <th>Kilometraje Foto</th>
+          <th>Gasolina Foto</th>
+          <th>Observaciones Foto</th>
+        </tr>
+      `;
       data.forEach(item => {
-        const row = buildDataRow(item);
-        tbody.appendChild(row);
+        const row = table.insertRow();
+        row.innerHTML = `
+          <td>${item.noperario.primernombre}</td>
+          <td>${item.placas.placa}</td>
+          <td>${item.fecha}</td>
+          <td>${item.estado}</td>
+          <td>${item.observaciones.texto}</td>
+          <td>${item.gasolina.texto}</td>
+          <td>${item.kilometrajeFotos ? `<img src="${item.kilometrajeFotos}" onclick="openImage('${item.kilometrajeFotos}')">` : 'N/A'}</td>
+          <td>${item.gasolina.foto ? `<img src="${item.gasolina.foto}" onclick="openImage('${item.gasolina.foto}')">` : 'N/A'}</td>
+          <td>${item.observaciones.foto ? `<img src="${item.observaciones.foto}" onclick="openImage('${item.observaciones.foto}')">` : 'N/A'}</td>
+        `;
       });
+      document.getElementById('data-table').innerHTML = '';
+      document.getElementById('data-table').appendChild(table);
     }
 
-    function deleteData(key) {
-      const deleteRef = ref(db, 'EmployeeSet/' + key);
-      remove(deleteRef)
-        .then(() => {
-          alert("Dato eliminado exitosamente");
-          searchData();
-        })
-        .catch((error) => {
-          alert("Error al eliminar dato: " + error.message);
-          console.error(error);
-        });
-    }
+    window.openImage = function (imageUrl) {
+      window.open(imageUrl, '_blank');
+    };
 
-    function searchData() {
-      const startDate = startDateInput.value;
-      const endDate = endDateInput.value;
-
-      const query = ref(db, 'EmployeeSet');
-      const data = [];
-
-      onValue(query, (snapshot) => {
-        snapshot.forEach((childSnapshot) => {
-          const childData = childSnapshot.val();
-          if ((!startDate || childData.fecha >= startDate) && (!endDate || childData.fecha <= endDate)) {
-            data.push({ ...childData, key: childSnapshot.key });
-          }
-        });
-
-        // Ordena por fecha de manera descendente
+    async function fetchData() {
+      try {
+        const snapshot = await get(ref(db, 'EmployeeSet'));
+        const data = [];
+        if (snapshot.exists()) {
+          snapshot.forEach((childSnapshot) => {
+            data.push(childSnapshot.val());
+          });
+        }
+        // Ordenar los datos por fecha de manera descendente
         data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-        renderData(data);
-      });
+        createTable(data);
+      } catch (error) {
+        console.error("Error al obtener datos:", error);
+      }
     }
 
-    // Autocompletar la fecha al cargar la página
-    startDateInput.value = getCurrentDateTime().slice(0, 10);
-    endDateInput.value = getCurrentDateTime().slice(0, 10);
+    window.searchData = async function () {
+      const searchDate = document.getElementById('searchDate').value;
+      if (searchDate) {
+        try {
+          const snapshot = await get(ref(db, 'EmployeeSet'));
+          const data = [];
+          if (snapshot.exists()) {
+            snapshot.forEach((childSnapshot) => {
+              const item = childSnapshot.val();
+              if (item.fecha.includes(searchDate)) {
+                data.push(item);
+              }
+            });
+          }
+          createTable(data);
+        } catch (error) {
+          console.error("Error al buscar datos:", error);
+        }
+      } else {
+        // Si no se proporciona una fecha, mostrar todos los datos
+        fetchData();
+      }
+    };
 
-    // Cargar datos iniciales
-    searchData();
+    fetchData(); // Llama a fetchData al cargar la página para obtener y mostrar los datos.
   </script>
 
   <div class="copyright">
-    <p>&copy; 2024 Creación de Datos. Elaborado por Nelson Fernando Correal Lopez.</p>
+    <p>&copy; 2024 Visualización de Datos. Todos los derechos reservados Nelson Fernando Correal Lopez.</p>
   </div>
 </body>
 
