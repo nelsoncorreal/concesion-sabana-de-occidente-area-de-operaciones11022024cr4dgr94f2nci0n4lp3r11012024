@@ -62,13 +62,13 @@
   <img src="Diseño sin título1.png" alt="Logo">
 
     <label for="searchDate">Buscar por Fecha:</label>
-    <input type="date" id="searchDate" onchange="searchData()">
-    
-    <div id="data-table"></div>
+  <input type="date" id="searchDate" onchange="searchData()">
+
+  <div id="data-table"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDblaWYr7qnuOrZxDflz2gilEwc4CgMLA8",
@@ -93,12 +93,14 @@
           <th>Estado de la Grúa</th>
           <th>Observaciones</th>
           <th>Gasolina</th>
-          <th>Gasolina y Kilometraje</th>
-          <th>Foto Observaciones</th>
+          <th>Gasolina Foto</th>
+          <th>Observaciones Foto</th>
         </tr>
       `;
+    
+      // Insertar filas en la parte superior de la tabla
       data.forEach(item => {
-        const row = table.insertRow();
+        const row = table.insertRow(1); // Usar 1 para insertar en la posición superior
         row.innerHTML = `
           <td>${item.noperario.primernombre}</td>
           <td>${item.placas.placa}</td>
@@ -110,9 +112,11 @@
           <td>${item.observaciones.foto ? `<img src="${item.observaciones.foto}" onclick="openImage('${item.observaciones.foto}')">` : 'N/A'}</td>
         `;
       });
+    
       document.getElementById('data-table').innerHTML = '';
       document.getElementById('data-table').appendChild(table);
     }
+    
 
     window.openImage = function (imageUrl) {
       window.open(imageUrl, '_blank');
@@ -124,7 +128,19 @@
         const data = [];
         if (snapshot.exists()) {
           snapshot.forEach((childSnapshot) => {
-            data.push(childSnapshot.val());
+            const item = childSnapshot.val();
+            console.log('Fecha bruta:', item.fecha);
+    
+            // Convertir la fecha al formato reconocido
+            const dateParts = item.fecha.match(/(\d+)/g);
+            if (dateParts && dateParts.length === 6) {
+              const formattedDate = `${dateParts[1]}/${dateParts[0]}/${dateParts[2]} ${dateParts[3]}:${dateParts[4]}:${dateParts[5]}`;
+              const date = new Date(formattedDate);
+              console.log('Fecha convertida:', date);
+              data.push(item);
+            } else {
+              console.error('Formato de fecha no reconocido:', item.fecha);
+            }
           });
         }
         // Ordenar los datos por fecha de manera descendente
@@ -134,36 +150,56 @@
         console.error("Error al obtener datos:", error);
       }
     }
+    
 
-    window.searchData = async function () {
-      const searchDate = document.getElementById('searchDate').value;
-      if (searchDate) {
-        try {
-          const snapshot = await get(ref(db, 'EmployeeSet'));
-          const data = [];
-          if (snapshot.exists()) {
-            snapshot.forEach((childSnapshot) => {
-              const item = childSnapshot.val();
-              if (item.fecha.includes(searchDate)) {
+window.searchData = async function () {
+  const searchDate = document.getElementById('searchDate').value;
+  if (searchDate) {
+    try {
+      const snapshot = await get(ref(db, 'EmployeeSet'));
+      const data = [];
+      if (snapshot.exists()) {
+        snapshot.forEach((childSnapshot) => {
+          const item = childSnapshot.val();
+          console.log('Fecha bruta:', item.fecha);
+
+          const dateParts = item.fecha.match(/(\d+)/g);
+          if (dateParts && dateParts.length === 6) {
+            const formattedDate = `${dateParts[1]}/${dateParts[0]}/${dateParts[2]} ${dateParts[3]}:${dateParts[4]}:${dateParts[5]}`;
+            const date = new Date(formattedDate);
+
+            console.log('Fecha convertida:', date);
+
+            // Verificar si la fecha es válida
+            if (!isNaN(date.getTime())) {
+              const itemDate = date.toISOString().split('T')[0];
+              if (itemDate === searchDate) {
                 data.push(item);
               }
-            });
+            } else {
+              console.error('Fecha no válida:', formattedDate);
+            }
+          } else {
+            console.error('Formato de fecha no reconocido:', item.fecha);
           }
-          createTable(data);
-        } catch (error) {
-          console.error("Error al buscar datos:", error);
-        }
-      } else {
-        // Si no se proporciona una fecha, mostrar todos los datos
-        fetchData();
+        });
       }
-    };
+      createTable(data);
+    } catch (error) {
+      console.error("Error al buscar datos:", error);
+    }
+  } else {
+    // Si no se proporciona una fecha, mostrar todos los datos
+    fetchData();
+  }
+};
+    
 
     fetchData(); // Llama a fetchData al cargar la página para obtener y mostrar los datos.
   </script>
 
   <div class="copyright">
-    <p>&copy; 2024 Visualización de Datos. Realizado por Nelson Fernando Correal Lopez.</p>
+    <p>&copy; 2024 Visualización de Datos. Todos los derechos reservados Nelson Fernando Correal Lopez.</p>
   </div>
 </body>
 
