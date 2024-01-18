@@ -91,7 +91,6 @@
           <th>Estado de la Grúa</th>
           <th>Observaciones</th>
           <th>Gasolina</th>
-          <th>Kilometraje Foto</th>
           <th>Gasolina Foto</th>
           <th>Observaciones Foto</th>
         </tr>
@@ -105,7 +104,6 @@
           <td>${item.estado}</td>
           <td>${item.observaciones.texto}</td>
           <td>${item.gasolina.texto}</td>
-          <td>${item.kilometrajeFotos ? `<img src="${item.kilometrajeFotos}" onclick="openImage('${item.kilometrajeFotos}')">` : 'N/A'}</td>
           <td>${item.gasolina.foto ? `<img src="${item.gasolina.foto}" onclick="openImage('${item.gasolina.foto}')">` : 'N/A'}</td>
           <td>${item.observaciones.foto ? `<img src="${item.observaciones.foto}" onclick="openImage('${item.observaciones.foto}')">` : 'N/A'}</td>
         `;
