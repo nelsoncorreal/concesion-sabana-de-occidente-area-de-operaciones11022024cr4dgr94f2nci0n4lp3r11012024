@@ -48,13 +48,15 @@
   <label for="estado">Estado de la Grúa (limpia sí/no):</label>
   <select id="estado">
     <option value="N/A">----</option>
-    <option value="si">Sí</option>
-    <option value="no">No</option>
+    <option value="Si está limpia">Sí </option>
+    <option value="No está limpia">No </option>
   </select>
   <br><br>
 
-  <label for="kilometrajeFoto">Foto de Kilometraje:</label>
-  <input type="file" id="kilometrajeFoto">
+
+
+  <label for="gasolinaFoto">Foto del medidor de Gasolina y Kilometraje:</label>
+  <input type="file" id="gasolinaFoto">
   <br><br>
 
   <label for="estadoGasolina">Estado de la Gasolina:</label>
@@ -67,12 +69,7 @@
   </select>
   <br><br>
 
-  <label for="gasolinaFoto">Foto de Gasolina:</label>
-  <input type="file" id="gasolinaFoto">
-  <br><br>
-
-  <label for="observaciones">Observaciones o Novedades Mecánicas y Foto (si no ve ninguna novedad, enviar foto frontal
-    del vehículo. ):</label>
+  <label for="observaciones">Observaciones o Novedades Mecánicas y Foto.:</label>
   <input type="file" id="observacionesFoto">
   <textarea id="fecha-observaciones" rows="4" cols="50"
     placeholder="Escribe aquí tus observaciones"></textarea>
@@ -84,7 +81,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDblaWYr7qnuOrZxDflz2gilEwc4CgMLA8",
@@ -96,6 +93,14 @@
       appId: "1:167496761184:web:4576d75997e3aebc462805"
     };
 
+    async function uploadFileAndGetUrl(file, folder) {
+      const storageRefFolder = storageRef(storage, `${folder}/${file.name}`);
+      const snapshot = await uploadBytes(storageRefFolder, file);
+  
+      // Devuelve la URL de descarga
+      return getDownloadURL(snapshot.ref);
+    }
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase();
     const storage = getStorage();
@@ -106,21 +111,13 @@
     const estadoInput = document.getElementById('estado');
     const observacionesFotoInput = document.getElementById('observacionesFoto');
     const observacionesInput = document.getElementById('fecha-observaciones');
-    const kilometrajeFotoInput = document.getElementById('kilometrajeFoto');
     const gasolinaFotoInput = document.getElementById('gasolinaFoto');
-    const gasolinaInput  = document.getElementById('kilometrajeFoto');  // Agregada referencia a kilometrajeInput
+    const gasolinaInput = document.getElementById('estadoGasolina');  
     const addBtn = document.getElementById('addBtn');
 
     function getCurrentDateTime() {
       const now = new Date();
       return now.toLocaleString();
-    }
-
-    function uploadFileAndGetUrl(file, folder) {
-      const storageRefFolder = storageRef(storage, `${folder}/${file.name}`);
-      return uploadString(storageRefFolder, file).then(snapshot => {
-        return getDownloadURL(snapshot.ref);
-      });
     }
 
     async function addData() {
@@ -134,11 +131,9 @@
       const currentDate = new Date();
       const currentDateTime = currentDate.toISOString().replace(/[^\d]/g, '');
       const observacionesFoto = observacionesFotoInput.files[0];
-      const kilometrajeFoto = kilometrajeFotoInput.files[0];
       const gasolinaFoto = gasolinaFotoInput.files[0];
 
       const observacionesFotoUrl = await uploadFileAndGetUrl(observacionesFoto, 'observacionesFotos');
-      const kilometrajeFotoUrl = await uploadFileAndGetUrl(kilometrajeFoto, 'kilometrajeFotos');
       const gasolinaFotoUrl = await uploadFileAndGetUrl(gasolinaFoto, 'gasolinaFotos');
 
       set(ref(db, 'EmployeeSet/' + currentDateTime), {
@@ -167,7 +162,6 @@
           estadoInput.value = '';
           observacionesInput.value = '';
           gasolinaInput.value = '';
-          gasolinaInput.value = '';
         })
         .catch((error) => {
           alert("Error al agregar datos: " + error.message);
@@ -187,5 +181,3 @@
 </body>
 
 </html>
-
-
