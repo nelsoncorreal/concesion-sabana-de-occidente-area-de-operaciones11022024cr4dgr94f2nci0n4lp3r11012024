@@ -198,6 +198,11 @@ window.searchData = async function () {
     
 
     fetchData(); // Llama a fetchData al cargar la página para obtener y mostrar los datos.
+
+        setInterval(() => {
+      fetchData();
+    }, 3000);
+    
   </script>
 
   <div class="copyright">
