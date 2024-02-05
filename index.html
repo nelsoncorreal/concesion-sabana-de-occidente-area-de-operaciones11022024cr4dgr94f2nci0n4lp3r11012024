@@ -19,6 +19,18 @@
       max-width: 150px;
       max-height: 150px;
     }
+    #loadingMessage {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
   </style>
 
 </head>
@@ -79,9 +91,13 @@
     placeholder="Escribe aquí tus observaciones"></textarea>
   <br><br>
 
-   <button id="addBtn" style="background-color: #3498db; color: #fff;"
-    onclick="addData(); this.style.backgroundColor='#2c3e50'; location.reload();">Agregar Datos</button>
+  <button id="addBtn" style="background-color: #3498db; color: #fff;"
+    onclick="addData(); this.style.backgroundColor='#2c3e50';">Agregar Datos</button>
 
+  <div id="loadingMessage" style="display: none;">
+    <p>Gracias por registrarte. La operación puede tardar hasta 2 minutos.</p>
+    <img src="loading.gif" alt="Cargando...">
+  </div>
 
 
 
@@ -121,8 +137,20 @@
     const gasolinaFotoInput = document.getElementById('gasolinaFoto');
     const gasolinaInput = document.getElementById('estadoGasolina');  
     const addBtn = document.getElementById('addBtn');
+    const loadingDiv = document.getElementById('loadingMessage');
+  const loadingImg = document.querySelector('#loadingMessage img');
 
      addBtn.addEventListener('click', addData);
+
+     function showLoadingMessage() {
+    loadingDiv.style.display = 'block';
+    // Puedes cambiar "loading.gif" al nombre de tu gif de carga
+    loadingImg.src = 'loading.gif';
+  }
+
+  function hideLoadingMessage() {
+    loadingDiv.style.display = 'none';
+  }
     
     function getCurrentDateTime() {
       const now = new Date();
@@ -130,6 +158,8 @@
     }
 
     async function addData() {
+
+        showLoadingMessage(); 
       if (
         !noperarioInput.value ||
         !placaInput.value
@@ -176,7 +206,12 @@
           alert("Error al agregar datos: " + error.message);
           console.error(error);
         });
-    }
+
+        setTimeout(() => {
+      hideLoadingMessage(); // Ocultar mensaje y gif de carga después de 2 minutos
+      location.reload();
+    }, 120000); // 120 segundos en milisegundos
+  }
 
     addBtn.addEventListener('click', addData);
 
