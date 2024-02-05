@@ -104,13 +104,12 @@
   <br><br>
 
   <button id="addBtn" style="background-color: #3498db; color: #fff;"
-    onclick="addData(); this.style.backgroundColor='#2c3e50';">Agregar Datos</button>
+    onclick="addData(); this.style.backgroundColor='#2c3e50'; location.reload();">Agregar Datos</button>
 
   <div id="loadingMessage" style="display: none;">
     <p>Gracias por registrarte. La operación puede tardar hasta 2 minutos.</p>
     <img src="loading.gif" alt="Cargando...">
   </div>
-
 
 
   <script type="module">
@@ -221,7 +220,7 @@
         setTimeout(() => {
       hideLoadingMessage(); 
       location.reload();
-    }, 60000); 
+    }, 30000); 
   }
   
 
