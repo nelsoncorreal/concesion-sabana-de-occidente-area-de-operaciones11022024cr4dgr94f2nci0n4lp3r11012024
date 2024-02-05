@@ -14,6 +14,18 @@
       margin-top: 20px;
       color: #1f1e1e;
     }
+    .fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 1000vw;
+      height: 1000vh;
+      background: rgba(122, 233, 78, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
 
     img {
       max-width: 150px;
@@ -23,9 +35,9 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 1000%;
-      height: 1000%;
-      background: rgba(122, 233, 78, 0.8); /* Fondo semi-transparente */
+      width: 1000vw;
+      height: 1000vh;
+      background: rgba(122, 233, 78, 0.8); 
       display: flex;
       justify-content: center;
       align-items: center;
@@ -144,7 +156,6 @@
 
      function showLoadingMessage() {
     loadingDiv.style.display = 'block';
-    // Puedes cambiar "loading.gif" al nombre de tu gif de carga
     loadingImg.src = 'loading.gif';
   }
 
@@ -208,14 +219,14 @@
         });
 
         setTimeout(() => {
-      hideLoadingMessage(); // Ocultar mensaje y gif de carga después de 2 minutos
+      hideLoadingMessage(); 
       location.reload();
-    }, 10000); // 120 segundos en milisegundos
+    }, 60000); 
   }
+  
 
     addBtn.addEventListener('click', addData);
 
-    // Autocompletar la fecha al cargar la página
     fechaInput.value = getCurrentDateTime();
   </script>
 
