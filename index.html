@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="Diseño sin título1.png">
+  <link rel="icon" href="Diseño sin título.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
   <title>Turno Grua</title>
   <style>
@@ -14,48 +14,23 @@
       margin-top: 20px;
       color: #1f1e1e;
     }
-    .fullscreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 1000vw;
-      height: 1000vh;
-      background: rgba(122, 233, 78, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
 
     img {
       max-width: 150px;
       max-height: 150px;
     }
-    #loadingMessage {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 1000vw;
-      height: 1000vh;
-      background: rgba(122, 233, 78, 0.8); 
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
   </style>
-
 </head>
 
 <body>
   <h1 style="color: black; font-size: 45px; font-family: 'Arial', sans-serif;">Estado De La Grúa</h1>
 
-    <div style="text-align: center;">
-    <img src="Diseño sin título1.png" alt="Logo" style="max-width: 15%; max-height: 15%; margin: auto; display: block;">
+  <div style="text-align: center;">
+    <img src="Diseño sin título.png" alt="Logo" style="max-width: 15%; max-height: 15%; margin: auto; display: block;">
   </div>
-  
+
   <label for="noperario">Nombre Operario:</label>
-  <input type="text" id="noperario">
+  <input type="text" id="noperario" required>
   <br><br>
 
   <label for="placa">Placa del Carro:</label>
@@ -81,10 +56,8 @@
   </select>
   <br><br>
 
-
-
   <label for="gasolinaFoto">Foto del medidor de Gasolina y Kilometraje:</label>
-  <input type="file" id="gasolinaFoto">
+  <input type="file" id="gasolinaFoto" accept="image/*">
   <br><br>
 
   <label for="estadoGasolina">Estado de la Gasolina:</label>
@@ -97,48 +70,15 @@
   </select>
   <br><br>
 
-  <label for="observaciones">Observaciones o Novedades Mecánicas y Foto.:</label>
-  <input type="file" id="observacionesFoto">
-  <textarea id="fecha-observaciones" rows="4" cols="50"
-    placeholder="Escribe aquí tus observaciones"></textarea>
+  <label for="observacionesFoto">Observaciones o Novedades Mecánicas y Foto.:</label>
+  <input type="file" id="observacionesFoto" accept="image/*">
+  <textarea id="fecha-observaciones" rows="4" cols="50" placeholder="Escribe aquí tus observaciones"></textarea>
   <br><br>
 
-  <button id="addBtn" style="background-color: #3498db; color: #fff;"
-    onclick="addData(); this.style.backgroundColor='#2c3e50'; location.reload();">Agregar Datos</button>
+  <button id="addBtn" style="background-color: #3498db; color: #fff;">Generar PDF</button>
 
-  <div id="loadingMessage" style="display: none;">
-    <p>Gracias por registrarte. La operación puede tardar hasta 2 minutos.</p>
-    <img src="loading.gif" alt="Cargando...">
-  </div>
-
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDblaWYr7qnuOrZxDflz2gilEwc4CgMLA8",
-      authDomain: "bd-gruas-crud.firebaseapp.com",
-      databaseURL: "https://bd-gruas-crud-default-rtdb.firebaseio.com",
-      projectId: "bd-gruas-crud",
-      storageBucket: "bd-gruas-crud.appspot.com",
-      messagingSenderId: "167496761184",
-      appId: "1:167496761184:web:4576d75997e3aebc462805"
-    };
-
-    async function uploadFileAndGetUrl(file, folder) {
-      const storageRefFolder = storageRef(storage, `${folder}/${file.name}`);
-      const snapshot = await uploadBytes(storageRefFolder, file);
-  
-      // Devuelve la URL de descarga
-      return getDownloadURL(snapshot.ref);
-    }
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase();
-    const storage = getStorage();
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <script>
     const noperarioInput = document.getElementById('noperario');
     const placaInput = document.getElementById('placa');
     const fechaInput = document.getElementById('fecha');
@@ -146,92 +86,166 @@
     const observacionesFotoInput = document.getElementById('observacionesFoto');
     const observacionesInput = document.getElementById('fecha-observaciones');
     const gasolinaFotoInput = document.getElementById('gasolinaFoto');
-    const gasolinaInput = document.getElementById('estadoGasolina');  
+    const gasolinaInput = document.getElementById('estadoGasolina');
     const addBtn = document.getElementById('addBtn');
-    const loadingDiv = document.getElementById('loadingMessage');
-  const loadingImg = document.querySelector('#loadingMessage img');
-
-     addBtn.addEventListener('click', addData);
-
-     function showLoadingMessage() {
-    loadingDiv.style.display = 'block';
-    loadingImg.src = 'loading.gif';
-  }
-
-  function hideLoadingMessage() {
-    loadingDiv.style.display = 'none';
-  }
-    
-    function getCurrentDateTime() {
-      const now = new Date();
-      return now.toLocaleString();
-    }
 
     async function addData() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ format: 'a4' }); // Tamaño A4
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const innerWidth = pageWidth - 2 * margin;
+      const innerHeight = pageHeight - 2 * margin;
+      let yOffset = margin;
 
-        showLoadingMessage(); 
-      if (
-        !noperarioInput.value ||
-        !placaInput.value
-      ) {
-        alert("Por favor, llene todos los campos del formulario.");
-        return;
-      }
-      const currentDate = new Date();
-      const currentDateTime = currentDate.toISOString().replace(/[^\d]/g, '');
-      const observacionesFoto = observacionesFotoInput.files[0];
-      const gasolinaFoto = gasolinaFotoInput.files[0];
+      // Set background color
+      doc.setFillColor(204, 255, 204); // Verde claro
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-      const observacionesFotoUrl = await uploadFileAndGetUrl(observacionesFoto, 'observacionesFotos');
-      const gasolinaFotoUrl = await uploadFileAndGetUrl(gasolinaFoto, 'gasolinaFotos');
+      // Add logo and title
+      const imgLogo = new Image();
+      imgLogo.src = 'Diseño sin título.png';
+      imgLogo.onload = () => {
+        doc.addImage(imgLogo, 'PNG', margin, yOffset, 30, 30);
+        doc.setFontSize(18);
+        doc.text('Turno Grúa', margin + 40, yOffset + 15);
+        yOffset += 40;
+        addContent();
+      };
+      imgLogo.onerror = () => {
+        console.error("Error al cargar la imagen del logo.");
+      };
 
-      set(ref(db, 'EmployeeSet/' + currentDateTime), {
-        noperario: {
-          primernombre: noperarioInput.value
-        },
-        placas: {
-          placa: placaInput.value
-        },
-        fecha: getCurrentDateTime(),
-        estado: estadoInput.value,
-        observaciones: {
-          texto: observacionesInput.value,
-          foto: observacionesFotoUrl
-        },
-        gasolina: {
-          texto: gasolinaInput.value,
-          foto: gasolinaFotoUrl
+      function addContent() {
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text(`Nombre del Operario:`, margin, yOffset);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${noperarioInput.value}`, margin + 60, yOffset);
+        yOffset += 10;
+
+        doc.setFont("helvetica", "bold");
+        doc.text(`Placa del Carro:`, margin, yOffset);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${placaInput.value}`, margin + 60, yOffset);
+        yOffset += 10;
+
+        doc.setFont("helvetica", "bold");
+        doc.text(`Fecha:`, margin, yOffset);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${fechaInput.value}`, margin + 60, yOffset);
+        yOffset += 10;
+
+        doc.setFont("helvetica", "bold");
+        doc.text(`Estado de la Grúa:`, margin, yOffset);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${estadoInput.value}`, margin + 60, yOffset);
+        yOffset += 10;
+
+        doc.setFont("helvetica", "bold");
+        doc.text(`Estado de la Gasolina:`, margin, yOffset);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${gasolinaInput.value}`, margin + 60, yOffset);
+        yOffset += 20;
+
+        if (gasolinaFotoInput.files[0]) {
+          doc.setFont("helvetica", "bold");
+          doc.text("Foto del medidor de Gasolina y Kilometraje:", margin, yOffset); // Título de la imagen
+          yOffset += 10;
+          const gasolinaImg = new Image();
+          gasolinaImg.src = URL.createObjectURL(gasolinaFotoInput.files[0]);
+          gasolinaImg.onload = () => {
+            doc.addImage(gasolinaImg, 'JPEG', margin, yOffset, innerWidth / 2 - 10, 60);
+            yOffset += 70;
+            addObservacionesImg();
+          };
+          gasolinaImg.onerror = () => {
+            console.error("Error al cargar la imagen de gasolina.");
+          };
+        } else {
+          addObservacionesImg();
         }
-      })
-        .then(() => {
-          alert("Datos agregados exitosamente");
-          noperarioInput.value = '';
-          placaInput.value = '';
-          fechaInput.value = '';
-          estadoInput.value = '';
-          observacionesInput.value = '';
-          gasolinaInput.value = '';
-        })
-        .catch((error) => {
-          alert("Error al agregar datos: " + error.message);
-          console.error(error);
-        });
 
-        setTimeout(() => {
-      hideLoadingMessage(); 
-      location.reload();
-    }, 30000); 
-  }
-  
+        function addObservacionesImg() {
+          if (observacionesFotoInput.files[0]) {
+            doc.setFont("helvetica", "bold");
+            doc.text("Foto de Observaciones o Novedades Mecánicas:", margin, yOffset); // Título de la imagen
+            yOffset += 10;
+            const observacionesImg = new Image();
+            observacionesImg.src = URL.createObjectURL(observacionesFotoInput.files[0]);
+            observacionesImg.onload = () => {
+              doc.addImage(observacionesImg, 'JPEG', margin, yOffset, innerWidth / 2 - 10, 60);
+              yOffset += 70;
+              addObservacionesText();
+            };
+            observacionesImg.onerror = () => {
+              console.error("Error al cargar la imagen de observaciones.");
+            };
+          } else {
+            addObservacionesText();
+          }
+        }
+
+        function addObservacionesText() {
+          if (observacionesInput.value) {
+            doc.setFont("helvetica", "bold");
+            doc.text("Observaciones:", margin, yOffset);
+            yOffset += 10;
+            doc.setFont("helvetica", "normal");
+            const splitObservaciones = doc.splitTextToSize(observacionesInput.value, innerWidth);
+            for (let i = 0; i < splitObservaciones.length; i++) {
+              if (yOffset > pageHeight - margin - 20) {
+                doc.addPage();
+                doc.setFillColor(204, 255, 204);
+                doc.rect(0, 0, pageWidth, pageHeight, 'F');
+                yOffset = margin;
+              }
+              doc.text(splitObservaciones[i], margin, yOffset);
+              yOffset += 10;
+            }
+          }
+          addFooter();
+        }
+
+        function addFooter() {
+          if (yOffset > pageHeight - margin - 10) {
+            doc.addPage();
+            doc.setFillColor(204, 255, 204);
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+            yOffset = pageHeight - margin - 10;
+          }
+          doc.setFont("helvetica", "italic");
+          doc.setFontSize(10);
+          doc.text('© 2024 Turno Grúas. Realizado por Nelson Fernando Correal Lopez.', pageWidth / 2, pageHeight - margin, { align: 'center' });
+          savePDF();
+        }
+      }
+
+      function savePDF() {
+        const currentDate = getCurrentDate();
+        const fileName = `${currentDate}_${noperarioInput.value}.pdf`;
+        doc.save(fileName);
+        alert('PDF generado con éxito. Ahora puede ser enviado al grupo de WhatsApp.');
+        location.reload(); // Refresca la página
+      }
+
+      fechaInput.value = new Date().toLocaleString();
+
+      function getCurrentDate() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        return `${day}-${month}-${year}`;
+      }
+    }
 
     addBtn.addEventListener('click', addData);
-
-    fechaInput.value = getCurrentDateTime();
   </script>
 
   <div class="copyright">
     <p>&copy; 2024 Creación de Datos. Realizado por Nelson Fernando Correal Lopez.</p>
   </div>
 </body>
-
 </html>
