@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Clientes</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" type="text/css" href="login.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+            max-width: 800px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .costas-container {
+            margin-top: 20px;
+            border: 1px dashed #007bff;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .costas-entry {
+            margin-bottom: 10px;
+        }
+
+        .movement-table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .movement-table th,
+        .movement-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .movement-table th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .movement-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .movement-row input {
+            margin-right: 5px;
+            flex-grow: 1;
+        }
+
+        .remove-btn {
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .add-button {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center; /* Centra el botón */
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Listado de Clientes</h1>
+
+    <div class="add-button">
+        <button onclick="window.location.href='abogado1.html'">Agregar</button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Buscar por nombre o documento">
+        <button onclick="searchClients()">Buscar</button>
+    </div>
+
+    <table id="client-table">
+        <thead>
+            <tr>
+                <th>Nombres y Apellidos</th>
+                <th># Doc Identidad</th>
+                <th>Fecha de Creación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los datos de los clientes se cargarán aquí -->
+        </tbody>
+    </table>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script>
+    // Configuración de Firebase (reemplaza con tus propias credenciales)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDblaWYr7qnuOrZxDflz2gilEwc4CgMLA8",
+        authDomain: "bd-gruas-crud.firebaseapp.com",
+        databaseURL: "https://bd-gruas-crud-default-rtdb.firebaseio.com",
+        projectId: "bd-gruas-crud",
+        storageBucket: "bd-gruas-crud.appspot.com",
+        messagingSenderId: "167496761184",
+        appId: "1:167496761184:web:4576d75997e3aebc462805"
+    };
+
+    // Inicializa la aplicación de Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Obtén una referencia a la base de datos
+    const db = firebase.database();
+    const clientsRef = db.ref('datos');
+
+    // Función para mostrar los datos de los clientes en la tabla
+    function showClientData(clientId, clientData) {
+        const tableBody = document.querySelector('#client-table tbody');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${clientData.clientName}</td>
+            <td>${clientData.clientId}</td>
+            <td>${new Date(clientData.createdAt).toLocaleDateString()}</td>
+            <td>
+                <button onclick="viewClientDetails('${clientId}')">Ver Detalles</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    }
+
+    // Función para ver todos los datos de un cliente
+    function viewClientDetails(clientId) {
+        // Redirigir a la página de detalles del cliente
+        window.location.href = `lecturadetails.html?id=${clientId}`;
+    }
+
+
+
+    // Función para buscar clientes por nombre o documento
+    function searchClients() {
+        const searchInput = document.getElementById('search-input');
+        const searchTerm = searchInput.value.toLowerCase();
+
+        // Limpiar la tabla antes de mostrar los resultados de búsqueda
+        const tableBody = document.querySelector('#client-table tbody');
+        tableBody.innerHTML = '';
+
+        clientsRef.once('value', function (snapshot) {
+            snapshot.forEach(function (childSnapshot) {
+                const clientId = childSnapshot.key;
+                const clientData = childSnapshot.val();
+                const clientName = clientData.clientName.toLowerCase();
+                const clientDocId = clientData.clientId.toLowerCase();
+
+                if (clientName.includes(searchTerm) || clientDocId.includes(searchTerm)) {
+                    showClientData(clientId, clientData);
+                }
+            });
+        });
+    }
+
+    // Escucha los cambios en la base de datos y muestra los datos de los clientes
+    clientsRef.on('child_added', function (snapshot) {
+        const clientId = snapshot.key;
+        const clientData = snapshot.val();
+        clientData.createdAt = clientData.createdAt || new Date().toISOString();
+        showClientData(clientId, clientData);
+    });
+</script>
+</body>
+
+</html>

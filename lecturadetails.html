@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Cliente</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" type="text/css" href="login.css">
+    <link rel="stylesheet" type="text/css" href="login.css">
+    <style>
+        .user-list {
+            margin-top: 20px;
+        }
+
+        .user-list li {
+            margin-bottom: 10px;
+        }
+
+        .movement-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.movement-table th,
+.movement-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.movement-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.movement-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.movement-table tbody tr:hover {
+    background-color: #e6e6e6;
+}
+
+.movement-table a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.movement-table a:hover {
+    text-decoration: underline;
+}
+
+.movement-table td:first-child,
+.movement-table th:first-child {
+    width: 80px;
+}
+
+.movement-table td:nth-child(3),
+.movement-table th:nth-child(3),
+.movement-table td:nth-child(4),
+.movement-table th:nth-child(4) {
+    width: 150px;
+}
+
+.movement-table td:nth-child(5),
+.movement-table th:nth-child(5) {
+    width: 200px;
+}
+
+.movement-table td:nth-child(6),
+.movement-table th:nth-child(6),
+.movement-table td:nth-child(7),
+.movement-table th:nth-child(7) {
+    width: 250px;
+}
+
+        .user-list button {
+            margin-left: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-list button.edit-btn {
+            background-color: #e7db2e;
+        }
+
+        .user-list button.delete-btn {
+            background-color: #dc3545;
+        }
+
+        .user-list button:hover {
+            background-color: #0056b3;
+        }
+
+        .user-list button.edit-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .user-list button.delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .filter-container {
+            margin-bottom: 10px;
+        }
+
+        .filter-container input {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;+
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .header button:hover {
+            background-color: #0056b3;
+        }
+
+        .notification {
+            margin-top: 10px;
+            color: green;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>Detalles del Cliente</h2>
+        <div id="client-details">
+            <p><strong>Nombres y Apellidos:</strong> <span id="client-name"></span></p>
+            <p><strong>Teléfono(s):</strong> <span id="client-phone"></span></p>
+            <p><strong>Dirección:</strong> <span id="client-address"></span></p>
+            <p><strong>Ciudad:</strong> <span id="client-city"></span></p>
+            <p><strong>Email:</strong> <span id="client-email"></span></p>
+            <p><strong># Cuenta Bancaria:</strong> <span id="client-account"></span></p>
+            <p><strong>Ahorro o Corriente:</strong> <span id="account-type"></span></p>
+            <p><strong>Nombre del Cuentahabiente:</strong> <span id="account-holder"></span></p>
+            <p><strong># Doc Identidad:</strong> <span id="client-id"></span></p>
+
+            <h3>Demandado</h3>
+            <p><strong>Nombres y Apellidos:</strong> <span id="defendant-name"></span></p>
+            <p><strong># Doc Identidad:</strong> <span id="defendant-id"></span></p>
+            <p><strong>Teléfono(s):</strong> <span id="defendant-phone"></span></p>
+            <p><strong>Dirección:</strong> <span id="defendant-address"></span></p>
+            <p><strong>Ciudad:</strong> <span id="defendant-city"></span></p>
+            <p><strong>Email:</strong> <span id="defendant-email"></span></p>
+            <p><strong>Pagaduría(s):</strong> <span id="defendant-payment"></span></p>
+
+            <h3>Obligación</h3>
+            <div id="costas-container"></div>
+            <p><strong># Del Titulo Valor:</strong> <span id="title-value"></span></p>
+            <p><strong>Plazo del Pago (Meses o Años):</strong> <span id="payment-term"></span></p>
+            <p><strong>Fecha del Crédito:</strong> <span id="credit-date"></span></p>
+            <p><strong>Fecha Vencimiento:</strong> <span id="expiration-date"></span></p>
+            <p><strong>Fecha Mora:</strong> <span id="late-date"></span></p>
+            <p><strong>Valor Capital:</strong> <span id="capital-value"></span></p>
+
+            <h3>Costas Proceso</h3>
+
+            <h3>Juzgados</h3>
+            <p><strong>Nombre Juzgado:</strong> <span id="court-name"></span></p>
+            <p><strong>Dirección:</strong> <span id="court-address"></span></p>
+            <p><strong>Ciudad:</strong> <span id="court-city"></span></p>
+            <p><strong>Teléfono:</strong> <span id="court-phone"></span></p>
+            <p><strong>Email:</strong> <span id="court-email"></span></p>
+            <p><strong>Radicado # de 21 dígitos:</strong> <span id="court-case-number"></span></p>
+
+            <h3>Movimientos</h3>
+            <table class="movement-table">
+                <thead>
+                    <tr>
+                        <th># de MVTO</th>
+                        
+                        <th>Expediente</th>
+                        
+                        <th>Fecha Creación del Movimiento</th>
+                        
+                        <th>Fecha Seguimiento</th>
+                        <th>Trámite a Realizar</th>
+                        <th>Archivo de Email Enviado x Juzgado</th>
+                        <th>Archivo Contestación a Juzgado</th>
+                    </tr>
+                </thead>
+                <tbody id="movement-body">
+                    <!-- Las filas de movimientos se agregarán dinámicamente aquí -->
+                </tbody>
+            </table>
+        </div>
+        <button type="submit"><a href="lectura.html" class="back-button">Volver</a></button>
+        
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script>
+        // Configuración de Firebase (reemplaza con tus propias credenciales)
+        const firebaseConfig = {
+    apiKey: "AIzaSyDblaWYr7qnuOrZxDflz2gilEwc4CgMLA8",
+    authDomain: "bd-gruas-crud.firebaseapp.com",
+    databaseURL: "https://bd-gruas-crud-default-rtdb.firebaseio.com",
+    projectId: "bd-gruas-crud",
+    storageBucket: "bd-gruas-crud.appspot.com",
+    messagingSenderId: "167496761184",
+    appId: "1:167496761184:web:4576d75997e3aebc462805"
+};
+
+        // Inicializa la aplicación de Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Obtén una referencia a la base de datos
+        const db = firebase.database();
+
+        // Obtén el ID del cliente de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const clientId = urlParams.get('id');
+
+        // Obtén una referencia al cliente específico en la base de datos
+        const clientRef = db.ref('datos/' + clientId);
+
+        // Obtén los datos del cliente de la base de datos
+        clientRef.once('value', function (snapshot) {
+            const clientData = snapshot.val();
+
+            // Muestra los datos del cliente en los elementos correspondientes
+            document.getElementById('client-name').textContent = clientData.clientName;
+            document.getElementById('client-phone').textContent = clientData.clientPhone;
+            document.getElementById('client-address').textContent = clientData.clientAddress;
+            document.getElementById('client-city').textContent = clientData.clientCity;
+            document.getElementById('client-email').textContent = clientData.clientEmail;
+            document.getElementById('client-account').textContent = clientData.clientAccount;
+            document.getElementById('account-type').textContent = clientData.accountType;
+            document.getElementById('account-holder').textContent = clientData.accountHolder;
+            document.getElementById('client-id').textContent = clientData.clientId;
+            document.getElementById('defendant-name').textContent = clientData.defendant.name;
+            document.getElementById('defendant-id').textContent = clientData.defendant.id;
+            document.getElementById('defendant-phone').textContent = clientData.defendant.phone;
+            document.getElementById('defendant-address').textContent = clientData.defendant.address;
+            document.getElementById('defendant-city').textContent = clientData.defendant.city;
+            document.getElementById('defendant-email').textContent = clientData.defendant.email;
+            document.getElementById('defendant-payment').textContent = clientData.defendant.payment;
+            document.getElementById('title-value').textContent = clientData.obligation.titleValue;
+            document.getElementById('payment-term').textContent = clientData.obligation.paymentTerm;
+            document.getElementById('credit-date').textContent = clientData.obligation.creditDate;
+            document.getElementById('expiration-date').textContent = clientData.obligation.expirationDate;
+            document.getElementById('late-date').textContent = clientData.obligation.lateDate;
+            document.getElementById('capital-value').textContent = clientData.obligation.capitalValue;
+            document.getElementById('court-name').textContent = clientData.courts.name;
+            document.getElementById('court-address').textContent = clientData.courts.address;
+            document.getElementById('court-city').textContent = clientData.courts.city;
+            document.getElementById('court-phone').textContent = clientData.courts.phone;
+            document.getElementById('court-email').textContent = clientData.courts.email;
+            document.getElementById('court-case-number').textContent = clientData.courts.caseNumber;
+
+            // Muestra las costas
+            const costasContainer = document.getElementById('costas-container');
+            clientData.costs.forEach(cost => {
+                const costasEntry = document.createElement('div');
+                costasEntry.innerHTML = `
+                    <p><strong>Fecha:</strong> ${cost.date}</p>
+                    <p><strong>Valor:</strong> ${cost.value}</p>
+                    <p><strong>Concepto u Observaciones:</strong> ${cost.concept}</p>
+                    <hr>
+                `;
+                costasContainer.appendChild(costasEntry);
+            });
+
+            // Muestra los movimientos
+            const movementBody = document.getElementById('movement-body');
+            clientData.movements.forEach((movement, index) => {
+                const newRow = document.createElement('tr');
+                            
+            // Obtener el nombre del archivo de email enviado
+            const emailSentFileName = movement.emailSent.split('/').pop();
+            
+            // Obtener el nombre del archivo de contestación
+            const contestationFileName = movement.contestation.split('/').pop();
+                newRow.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${movement.expediente}</td>
+                    <td>${movement.creationDate}</td>
+                    <td>${movement.seguimiento}</td>
+                    <td>${movement.tramite}</td>
+                    <td><a href="${movement.emailSent}" target="_blank">Enviado x Juzgado</a></td>
+                <td><a href="${movement.contestation}" target="_blank">Contestación a Juzgado</a></td>
+            `;
+                movementBody.appendChild(newRow);
+            });
+        });
+    </script>
+</body>
+
+</html>
